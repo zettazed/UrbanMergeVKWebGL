@@ -144,24 +144,42 @@
         }  
       });
     }
-
-    bridge.subscribe((e) => {
-      if (e.detail.type === 'VKWebAppViewHide') {
-        unityInstance.SendMessage('VKManager', 'AudioOff', JSON.stringify(data.result)); // Останавливаем воспроизведение аудио 
-        // Действия при переключении
-        // из игры или мини приложения
-      }
-    });
     
-    bridge.subscribe((e) => {
-      if (e.detail.type === 'VKWebAppViewRestore') {
-        unityInstance.SendMessage('VKManager', 'AudioOn', JSON.stringify(data.result)); // Запускаем воспроизведение
-        // Действия при восстановлении 
-        // экрана игры или мини приложения
-      }
+    jQuery(document).ready(function($) // страница прогружена
+    {
+      console.log("ready!");
+      vkBridge.send('VKWebAppInit')
+      .then((data) => { 
+        if (data.result) {
+          console.log("VKWebAppInit Ok!");
+          // Приложение инициализировано
+          vkBridge.subscribe((e) => {
+          if (e.detail.type === 'VKWebAppViewHide') {
+            console.log("VKWebAppViewHide!");
+            unityInstance.SendMessage('VKManager', 'AudioOff', JSON.stringify(data.result)); // Останавливаем воспроизведение аудио 
+            // Действия при переключении
+            // из игры или мини приложения
+          }
+        });
+        
+        vkBridge.subscribe((e) => {
+          if (e.detail.type === 'VKWebAppViewRestore') {
+            console.log("VKWebAppViewRestore!");
+            unityInstance.SendMessage('VKManager', 'AudioOn', JSON.stringify(data.result)); // Запускаем воспроизведение
+            // Действия при восстановлении 
+            // экрана игры или мини приложения
+          }
+        });
+        } else {
+          // Ошибка
+          console.log("VKWebAppInit No!");
+        }
+      })
+      .catch((error) => {
+        // Ошибка
+        console.log(error);
+      });
     });
-
-    vkBridge.send('VKWebAppInit');
   </script>
   <script>
     function auth() {
